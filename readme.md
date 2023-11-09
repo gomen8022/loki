@@ -63,3 +63,5 @@ You can find examples of proper $params validation in tests/LokiTest::testPostSt
 
     LokiHandler::getPageBlocks($params);
 Examples of validation data can be seen in tests/LokiTest::testGetPageBlocks, and you can also find an example response there.
+
+**Note:** If you have any questions or suggestions, please feel free to reach out to us at ggommenn@gmail.com. 

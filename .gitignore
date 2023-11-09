@@ -1,5 +1,4 @@
-./vendor
-./.idea
-./.vscode
+vendor/
 .idea/
-./data
+.vscode/
+data/

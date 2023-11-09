@@ -42,8 +42,25 @@ class LokiTest extends TestCase
         try {
             $_SERVER['HTTP_USER_AGENT'] = $params['user_agent'];
             $result = LokiHandler::getPageBlocks($params);
-
             $this->assertIsArray($result);
+            //The way how response looks like
+            $arrayResponse = [
+                "turn" => [
+                    "review" => 1,
+                    "conv_test" => 0,
+                    "faq_static" => 0,
+                    "conv_right" => 0,
+                    "master_spec" => 1,
+                ],
+                "uuid" => "5cc52673-12ca-42a6-bbc5-45746f4a1141",
+            ];
+
+            $this->assertArrayHasKey('turn', $result);
+            $this->assertArrayHasKey('uuid', $result);
+
+            $this->assertIsArray($result['turn']);
+
+            $this->assertEquals('5cc52673-12ca-42a6-bbc5-45746f4a1141', $result['uuid']);
         } catch (\Exception $e) {
             $this->fail("fail test at getPageBlocks: " . $e->getMessage());
         }

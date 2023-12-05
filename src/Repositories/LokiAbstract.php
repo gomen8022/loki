@@ -26,11 +26,14 @@ abstract class LokiAbstract
     ): Collection
     {
         try {
-            $this->responce = $this->getClient()->request($method, $this->getConfig('app.loki_url') . $uri, [
-                'form_params' => $formParams,
-            ]);
+            $this->response = $this
+                ->getClient()
+                ->request($method,
+                    $this->getConfig('app.loki_url') . $uri,
+                    ['form_params' => $formParams]
+                );
 
-            return collect(json_decode($this->responce->getBody()->getContents(), true));
+            return collect(json_decode($this->response->getBody()->getContents(), true));
 
         } catch (RequestException $exception) {
             Log::info($exception->getMessage());

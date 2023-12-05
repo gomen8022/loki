@@ -2,9 +2,9 @@
 
 namespace Loki\Services;
 
+use Loki\DTO\RequestDataDTO;
 use Loki\Helpers\ConfigLoaderTrait;
 use Loki\Helpers\UuidDevice;
-use Carbon\Carbon;
 use Illuminate\Http\Response;
 use Loki\Repositories\RestRepositoryInterface;
 use Illuminate\Validation\Factory;
@@ -22,42 +22,21 @@ class LokiService
         $this->restRepository = $restRepository;
     }
 
+    //TODO: test at back side
     public function postStats(
         array $request
     )
     {
-        $translator = new Translator(new ArrayLoader(), 'en');
-        $factory = new Factory($translator);
-
-        $validator = $factory->make($request, [
-            'location' => 'required',
-            'data' => 'array|required',
-            'user_agent' => 'required',
-            'uri' => 'required',
-            'ip' => 'required',
-            'domain' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            throw new \Exception('postStats validation failed');
+        try {
+            $requestData = new RequestDataDTO($request);
+        } catch (\InvalidArgumentException $e) {
+            throw new \Exception('RequestDataDTO validation failed: ' . $e->getMessage());
         }
 
-        $data = [
-            'user_id' => $request['data']['user_id'],
-            'location' => $request['location'],
-            'domain' => $request['domain'],
-            'data' => $request['data']['moves'],
-            'time' => Carbon::now()->toDateTimeString(),
-            'ip' => $request['ip'],
-            'user_agent' => $request['user_agent'],
-            'forming_type' => $request['data']['forming_type'],
-        ];
-
         try {
-            $this->restRepository->postFlip($data);
+            $this->restRepository->postFlip($requestData->toArray());
         } catch (\Throwable $e) {
-            return $e;
+            throw new \Exception('restRepository postFlip failed: ' . $e->getMessage());
         }
 
         return new Response("", 204);
@@ -67,38 +46,13 @@ class LokiService
         array $request
     ): Response
     {
-        $translator = new Translator(new ArrayLoader(), 'en');
-        $factory = new Factory($translator);
-
-        $validator = $factory->make($request, [
-            'city' => 'required',
-            'country' => 'required',
-            'data' => 'array|required',
-            'user_agent' => 'required',
-            'uri' => 'required',
-            'ip' => 'required',
-            'domain' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors();
-            throw new \Exception('postUnliquidStats validation failed');
+        try {
+            $requestData = new RequestDataDTO($request);
+        } catch (\InvalidArgumentException $e) {
+            throw new \Exception('RequestDataDTO validation failed: ' . $e->getMessage());
         }
 
-        $data = [
-            'user_id' => $request['data']['user_id'],
-            'country' => $request['country'],
-            'city' => $request['city'],
-            'domain' => $request['domain'],
-            'data' => $request['data']['moves'],
-            'time' => Carbon::now()->toDateTimeString(),
-            'ip' => $request['ip'],
-            'user_agent' => $request['user_agent'],
-            'forming_type' => $request['data']['forming_type'],
-            'lead' => isset($request['data']['lead']) ? $request['data']['lead'] : false
-        ];
-
-        $data['data'] = json_encode($data['data']);
+        $data = $requestData->toJson();
 
         $file = $this->getConfig('app.session_stored');
 

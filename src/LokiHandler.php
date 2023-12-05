@@ -3,7 +3,6 @@
 namespace Loki;
 
 use Illuminate\Http\Response;
-use Illuminate\Http\Request;
 use Loki\Services\LokiService;
 use Loki\Repositories\LokiFormingRepository;
 use Loki\Repositories\LokiStatRepository;
@@ -61,7 +60,12 @@ class LokiHandler
     {
         $formingRepo = new LokiStatRepository();
         $loki = new LokiService($formingRepo);
-        return $loki->postUnliquidStats($params);
+
+        try {
+           return $loki->postUnliquidStats($params);
+        }catch (\Exception $e) {
+            throw new \Exception('RequestDataDTO validation failed: ' . $e->getMessage());
+        }
     }
 
 }
